@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: greeter-server-lb
+spec:
+  clusterIP: None  # Headless service
+  ports:
+  # Use port named "grpclb" to expose the needed DNS SRV record
+  - name: grpclb
+    port: 9000
+    targetPort: 50051
+  selector:
+    app: greeter-server-lb
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: greeter-server-lb
+spec:
+    replicas: 2
+    template:
+    metadata:
+        labels:
+        app: greeter-server-lb
+    spec:
+        containers:
+        - name: greeter-server
+          image: shashibanger/grpc_go:1.0
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "500m"
+            limits:
+              memory: "128Mi"
+              cpu: "1000m"
+          ports:
+          - containerPort: 50051
+          env:
+          - name: BACKEND_SERVICE_NAME
+            value: "greeter-server"
+          command: ["greeter_server"]
+          #args: ["HOSTNAME", "KUBERNETES_PORT"]
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+    name: greeter-client
+spec:
+    replicas: 1
+    template:
+    metadata:
+        labels:
+        app: greeter-client
+    spec:
+        containers:
+        - name: greeter-client
+          image: shashibanger/grpc_go:1.0
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+          - containerPort: 50051
+          env:
+          - name: BACKEND_SERVICE_NAME
+            value: "greeter-client"
+          command: ["greeter_client"]
+          args: ["-m", "kubernetes"]
+
