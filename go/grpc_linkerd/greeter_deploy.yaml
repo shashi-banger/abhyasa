@@ -1,14 +1,21 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sb-grpc-go
+---
 apiVersion: v1
 kind: Service
 metadata:
   name: greeter-server-lb
+  namespace: sb-grpc-go
 spec:
   clusterIP: None  # Headless service
   ports:
   # Use port named "grpclb" to expose the needed DNS SRV record
   - name: grpclb
     port: 9000
-    targetPort: 50051
+    targetPort: 9000
   selector:
     app: greeter-server-lb
 ---
@@ -16,15 +23,19 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
     name: greeter-server-lb
+    namespace: sb-grpc-go
 spec:
-    replicas: 2
-    template:
-    metadata:
-        labels:
+    replicas: 5
+    selector:
+      matchLabels:
         app: greeter-server-lb
-    spec:
+    template:
+      metadata:
+        labels:
+          app: greeter-server-lb
+      spec:
         containers:
-        - name: greeter-server
+        - name: greeter-server-lb
           image: shashibanger/grpc_go:1.0
           resources:
             requests:
@@ -34,39 +45,46 @@ spec:
               memory: "128Mi"
               cpu: "1000m"
           ports:
-          - containerPort: 50051
+          - containerPort: 9000
           env:
+          - name: GRPC_VERBOSITY
+            value: "debug"
           - name: BACKEND_SERVICE_NAME
             value: "greeter-server"
+          #command: ["/bin/bash"]
+          #args: ["-c", "while [ 1 ]; do sleep 1; done"]
           command: ["greeter_server"]
-          #args: ["HOSTNAME", "KUBERNETES_PORT"]
+          args: ["HOSTNAME", "KUBERNETES_PORT"]
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
     name: greeter-client
+    namespace: sb-grpc-go
 spec:
     replicas: 1
     template:
-    metadata:
+      metadata:
         labels:
-        app: greeter-client
-    spec:
+          app: greeter-client
+      spec:
         containers:
         - name: greeter-client
           image: shashibanger/grpc_go:1.0
           resources:
             requests:
               memory: "64Mi"
-              cpu: "250m"
+              cpu: "1000m"
             limits:
               memory: "128Mi"
-              cpu: "500m"
+              cpu: "1500m"
           ports:
-          - containerPort: 50051
+          - containerPort: 9000
           env:
           - name: BACKEND_SERVICE_NAME
             value: "greeter-client"
+          #command: ["/bin/bash"]
+          #args: ["-c", "while [ 1 ]; do sleep 1; done"]
           command: ["greeter_client"]
           args: ["-m", "kubernetes"]
 

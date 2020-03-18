@@ -6,18 +6,22 @@ COPY greeter.tgz /root/
 ENV DEBIAN_FRONTEND noninteractive
 ENV INITRD No
 ENV LANG en_US.UTF-8
-ENV GOVERSION 1.14.0
+ENV GOVERSION 1.14
 ENV GOROOT /opt/go
-ENV GOPATH /root/.go
+ENV GOPATH /root/go
+ENV PATH $PATH:$GOPATH/bin
 
-RUN apt-get update && apt-get install -y wget &&\
+RUN apt-get update && apt-get install -y wget curl git unzip &&\
+    PROTOC_ZIP=protoc-3.7.1-linux-x86_64.zip &&\
+    curl -OL https://github.com/protocolbuffers/protobuf/releases/download/v3.7.1/$PROTOC_ZIP &&\
+    unzip -o $PROTOC_ZIP -d /usr/local bin/protoc &&\
+    unzip -o $PROTOC_ZIP -d /usr/local 'include/*' &&\
     cd /opt && wget https://dl.google.com/go/go1.14.linux-amd64.tar.gz && \
     tar zxf go${GOVERSION}.linux-amd64.tar.gz && rm go${GOVERSION}.linux-amd64.tar.gz && \
     ln -s /opt/go/bin/go /usr/bin/ && \
     mkdir $GOPATH
 
-RUN apk update && apk add curl protobuf git
-RUN go get -u github.com/golang/protobuf/protoc-gen-go  
+RUN go get -u github.com/golang/protobuf/protoc-gen-go
 RUN cd /root/ && tar -zxvf greeter.tgz && ./build.sh
 
 ##### run stage #############################################################
