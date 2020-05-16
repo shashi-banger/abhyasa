@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg">
+<circle cx="1920" cy="1000" r="50"/>
+<circle cx="500" cy="500" r="50" stroke="blue" stroke-width="8" stroke-dasharray="8,3" fill="orange"/>
+<line x1="5" y1="10" x2="99" y2="30" stroke-width=".5" stroke="red"/>
+
+<line x1="15" y1="15" x2="140" y2="135" stroke-width="25"
+stroke="blue" stroke-linecap="round"/>
+
+<line x1="15" y1="15" x2="140" y2="135" stroke-width="25"
+stroke="aqua" stroke-dasharray="8,3,2,10, 4, 4"/>
+
+<line x1="15" y1="155" x2="160" y2="60" stroke-width="25"
+stroke="blue"/>
+
+<line x1="15" y1="155" x2="160" y2="60" stroke-width="25"
+stroke="orange" stroke-dasharray="8,3,2"/>
+
+<path d="M 70,290 L 150,150 200,250 40,250 100,150 170,290" fill-rule="evenodd"/>
+
+</svg>
