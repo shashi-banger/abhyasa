@@ -8,16 +8,76 @@ def levenshtein(s1, s2):
     if len(s2) == 0:
         return len(s1)
 
+    # intmd_state is len(s1)*len(s2) 2-D matrix
+    # Each elements of 2-d array can take one of the following values
+    #   1 if min(i,j) = min(i-1, j-1)     <- Match
+    #   2 if min(i,j) = min(i-1, j-1) + 1 <- Substitution
+    #   3 if min(i,j) = min(i-1, j) + 1  <- Insertion
+    #   4 if min(i,j) = min(i, j-1) + 1  <- Deletions
+
+    intmd_state = [ [0]*(len(s2) + 1) for i in range(len(s1) + 1)]
+
+    for j in range(1, len(s2) + 1):
+        intmd_state[0][j] = 4
+    for i in range(1, len(s2) + 1):
+        intmd_state[i][0] = 3
+
     previous_row = range(len(s2) + 1)
+    print(intmd_state)
     for i, c1 in enumerate(s1):
         current_row = [i + 1]
         for j, c2 in enumerate(s2):
             insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
             deletions = current_row[j] + 1       # than s2
             substitutions = previous_row[j] + (c1 != c2)
-            current_row.append(min(insertions, deletions, substitutions))
+            min_val = min(insertions, deletions, substitutions)
+            current_row.append(min_val)
+
+            print(min_val, insertions, deletions, substitutions)
+            if min_val == insertions:
+                intmd_state[i+1][j+1] = 3
+            elif min_val == deletions:
+                intmd_state[i+1][j+1] = 4
+            elif min_val == substitutions and (c1 != c2):
+                intmd_state[i+1][j+1] = 2
+            else:
+                intmd_state[i+1][j+1] = 1
+
+            print(intmd_state)
+
         previous_row = current_row
     
+    print("Levenshtein distance=", previous_row[-1])
+
+    out_sent1 = []
+    out_sent2 = []
+
+    i = len(s1)
+    j = len(s2)
+
+    while True:
+        print(i,j)
+        if intmd_state[i][j] == 3:
+            out_sent1.append(s1[i-1])
+            out_sent2.append("$$$")
+            i = i-1
+        elif intmd_state[i][j] == 4:
+            out_sent1.append("$$$")
+            out_sent2.append(s2[j-1])
+            j = j-1
+        else:
+            out_sent1.append(s1[i-1])
+            out_sent2.append(s2[j-1])
+            i = i -1
+            j = j-1
+
+        if i==0 and j==0:
+            break
+
+    out_sent1.reverse()
+    out_sent2.reverse()
+    print("out sentence 1: ", out_sent1)
+    print("out sentence 2: ", out_sent2)
     return previous_row[-1]
 
 
@@ -27,12 +87,12 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print('Usage: python sentence_distance.py "sentence1" "sentence2"')
         print('Example usage')
-        print('python sentence_distance.py "foo bar" foo bar world"')
+        print('python sentence_distance.py "foo bar" "foo bar world"')
         print('python sentence_distance.py "hello world" "hello world"')
+        print('python sentence_distance.py "Hello foo World my name is abc" "Hello World boo def is my name"')
         sys.exit(1)
 
     sentence_1 = sys.argv[1].split(" ")
     sentence_2 = sys.argv[2].split(" ")
     print(levenshtein(sentence_1, sentence_2)/max(len(sentence_1),
                                                   len(sentence_2)))
-
