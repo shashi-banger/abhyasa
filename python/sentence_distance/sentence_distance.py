@@ -24,24 +24,24 @@ def levenshtein(s1, s2):
 
     previous_row = range(len(s2) + 1)
     print(intmd_state)
-    for i, c1 in enumerate(s1):
-        current_row = [i + 1]
-        for j, c2 in enumerate(s2):
-            insertions = previous_row[j + 1] + 1 # j+1 instead of j since previous_row and current_row are one character longer
-            deletions = current_row[j] + 1       # than s2
-            substitutions = previous_row[j] + (c1 != c2)
+    for i, c1 in enumerate(s1, 1): # i starts from 1
+        current_row = [i]
+        for j, c2 in enumerate(s2, 1): # j starts from 1,...
+            insertions = previous_row[j] + 1 # j+1 instead of j since previous_row and current_row are one character longer
+            deletions = current_row[j - 1] + 1       # than s2
+            substitutions = previous_row[j - 1] + (c1 != c2)
             min_val = min(insertions, deletions, substitutions)
             current_row.append(min_val)
 
             print(min_val, insertions, deletions, substitutions)
             if min_val == insertions:
-                intmd_state[i+1][j+1] = 3
+                intmd_state[i][j] = 3
             elif min_val == deletions:
-                intmd_state[i+1][j+1] = 4
+                intmd_state[i][j] = 4
             elif min_val == substitutions and (c1 != c2):
-                intmd_state[i+1][j+1] = 2
+                intmd_state[i][j] = 2
             else:
-                intmd_state[i+1][j+1] = 1
+                intmd_state[i][j] = 1
 
             print(intmd_state)
 
