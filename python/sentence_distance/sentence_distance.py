@@ -1,43 +1,54 @@
 
 
 def levenshtein(s1, s2):
-    if len(s1) < len(s2):
-        return levenshtein(s2, s1)
+    """Implements Levenshtein algorithm as described in
+    https://en.wikipedia.org/wiki/Levenshtein_distance
 
+    :param s1: list of string corresponding to first sentence
+    :type s1: list
+    :param s2: list of string corresponding to second sentence
+    :type s2: list
+    :return: Levenshtein distance i.e. number of edits required to go from s1 to s2
+    :rtype: int
+    """
     # len(s1) >= len(s2)
     if len(s2) == 0:
         return len(s1)
+
+    if len(s1) == 0:
+        return len(s2)
 
     # intmd_state is len(s1)*len(s2) 2-D matrix
     # Each elements of 2-d array can take one of the following values
     #   1 if min(i,j) = min(i-1, j-1)     <- Match
     #   2 if min(i,j) = min(i-1, j-1) + 1 <- Substitution
-    #   3 if min(i,j) = min(i-1, j) + 1  <- Insertion
-    #   4 if min(i,j) = min(i, j-1) + 1  <- Deletions
+    #   3 if min(i,j) = min(i-1, j) + 1  <- Deletion when transforming s1 to s2
+    #   4 if min(i,j) = min(i, j-1) + 1  <- Insertion when transforming s1 to s2
 
     intmd_state = [ [0]*(len(s2) + 1) for i in range(len(s1) + 1)]
 
+    for i in range(1, len(s1) + 1):
+        intmd_state[i][0] = 3
     for j in range(1, len(s2) + 1):
         intmd_state[0][j] = 4
-    for i in range(1, len(s2) + 1):
-        intmd_state[i][0] = 3
+    
 
     previous_row = range(len(s2) + 1)
     print(intmd_state)
     for i, c1 in enumerate(s1, 1): # i starts from 1
         current_row = [i]
         for j, c2 in enumerate(s2, 1): # j starts from 1,...
-            insertions = previous_row[j] + 1 # j+1 instead of j since previous_row and current_row are one character longer
-            deletions = current_row[j - 1] + 1       # than s2
+            deletions = previous_row[j] + 1 
+            insertions = current_row[j - 1] + 1       # than s2
             substitutions = previous_row[j - 1] + (c1 != c2)
             min_val = min(insertions, deletions, substitutions)
             current_row.append(min_val)
 
             print(min_val, insertions, deletions, substitutions)
             if min_val == insertions:
-                intmd_state[i][j] = 3
-            elif min_val == deletions:
                 intmd_state[i][j] = 4
+            elif min_val == deletions:
+                intmd_state[i][j] = 3
             elif min_val == substitutions and (c1 != c2):
                 intmd_state[i][j] = 2
             else:
