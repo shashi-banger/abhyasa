@@ -39,7 +39,7 @@ def levenshtein(s1, s2):
         current_row = [i]
         for j, c2 in enumerate(s2, 1): # j starts from 1,...
             deletions = previous_row[j] + 1 
-            insertions = current_row[j - 1] + 1       # than s2
+            insertions = current_row[j - 1] + 1       
             substitutions = previous_row[j - 1] + (c1 != c2)
             min_val = min(insertions, deletions, substitutions)
             current_row.append(min_val)
