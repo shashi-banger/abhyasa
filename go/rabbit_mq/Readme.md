@@ -18,3 +18,7 @@ go run consumer.go
 go run producer.go
 ```
 
+## References
+
+1. https://docs.google.com/presentation/d/1Fhu6qgEkvy-6vB0kylSMBu6T-nIxlfh7UA5dsRLLZsE/present#slide=id.i4
+
