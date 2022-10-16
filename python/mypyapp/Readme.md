@@ -18,21 +18,17 @@ Setup pytest in virtual env
 source .venv/bin/activate
 pip install pytest
 deactivate
-source venv/bin/activate
+source .venv/bin/activate
 ```
-
-## Running pytest 
 
 For local source code test run the following
-
 ```
-pythons -m pytest
+python -m pytest -s
 ```
 
 For testing installed package
-
 ```
-pytest 
+pytest -s 
 ```
 
 ## References
