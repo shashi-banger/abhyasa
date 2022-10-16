@@ -1,0 +1,14 @@
+[build-system]
+requires = [
+    "setuptools>=30.3.0",
+    "wheel",
+    "setuptools_scm>=3.3.1",
+]
+
+[project]
+name = "mypy"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
