@@ -1,10 +1,9 @@
 package main
 
-
 import (
-    "fmt"
-    "context"
-    "time"
+	"context"
+	"fmt"
+	"time"
 )
 
 type data struct {
@@ -12,14 +11,14 @@ type data struct {
 }
 
 func main() {
-    // Set a duration.
-    duration := 3000 * time.Millisecond
+	// Set a duration.
+	duration := 3000 * time.Millisecond
 
-    // Create a context that is both manually cancellable and will signal
+	// Create a context that is both manually cancellable and will signal
 	// a cancel at the specified duration.
 	ctx, cancel := context.WithTimeout(context.Background(), duration)
-    //ctx, cancel := context.WithCancel(ctx)
-    ctx, cancel = context.WithCancel(ctx)
+	//ctx, cancel := context.WithCancel(ctx)
+	ctx, cancel = context.WithCancel(ctx)
 	//defer cancel()
 
 	// Create a channel to received a signal that work is done.
@@ -31,14 +30,14 @@ func main() {
 		// Simulate work.
 		time.Sleep(4000 * time.Millisecond)
 
-        fmt.Println("Calling done")
+		fmt.Println("Calling done")
 		ch <- data{"123"}
 		time.Sleep(5000 * time.Millisecond)
-        <- c.Done()
+		<-c.Done()
 
-        fmt.Println("done ", c.Err())
+		fmt.Println("done ", c.Err())
 
-        return
+		return
 	}(ctx)
 
 	// Wait for the work to finish. If it takes too long move on.
@@ -49,8 +48,8 @@ func main() {
 	case <-ctx.Done():
 		fmt.Println("work cancelled")
 	}
-    fmt.Println("cancel")
-    cancel()
-    fmt.Println("after cancel ", ctx.Err())
-    time.Sleep(1000 * time.Millisecond)
+	fmt.Println("cancel")
+	cancel()
+	fmt.Println("after cancel ", ctx.Err())
+	time.Sleep(1000 * time.Millisecond)
 }

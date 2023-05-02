@@ -11,8 +11,8 @@ var wg sync.WaitGroup
 
 func activity(c context.Context) {
 	defer wg.Done()
-	for i := 0; i < 10; i++ {
-		fmt.Printf("Sleeping %d\n", i)
+	for i := 0; i < 5; i++ {
+		fmt.Printf("Thrd 0: Sleeping %d\n", i)
 		select {
 		case <-time.After(time.Second):
 			continue
@@ -20,11 +20,12 @@ func activity(c context.Context) {
 			return
 		}
 	}
+	fmt.Println("Thrd 0: Done")
 }
 
 func activity1(c context.Context) {
 	defer wg.Done()
-	for i := 0; i < 15; i++ {
+	for i := 0; i < 7; i++ {
 		fmt.Printf("Thrd 1: Sleeping %d\n", i)
 		select {
 		case <-time.After(time.Second):
@@ -33,11 +34,12 @@ func activity1(c context.Context) {
 			return
 		}
 	}
+	fmt.Println("Thrd 1: Done")
 }
 
 func main() {
 	// Set a duration.
-	duration := 3000 * time.Millisecond
+	duration := 20000 * time.Millisecond
 	wg.Add(2)
 
 	// Create a context that is both manually cancellable and will signal
@@ -48,8 +50,10 @@ func main() {
 	go activity(ctx)
 	go activity1(ctx)
 	wg.Wait()
-	<-ctx.Done()
+	//cancel()
+	//<-ctx.Done()
 
 	fmt.Printf("Completed\n")
+	fmt.Println("contextErr: ", ctx.Err())
 
 }
