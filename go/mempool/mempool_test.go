@@ -73,3 +73,34 @@ func BenchmarkMempool(b *testing.B) {
 	fmt.Println("total:", m2.TotalAlloc-m1.TotalAlloc)
 	fmt.Println("mallocs:", m2.Mallocs-m1.Mallocs)
 }
+
+func TestParallelUsage(t *testing.T) {
+	var wg sync.WaitGroup
+	var m1, m2 runtime.MemStats
+	nb := 10
+	runtime.GC()
+	mp := NewMemPool(nb)
+	allBufs := []*bytes.Buffer{}
+	s := "hello"
+
+	runtime.ReadMemStats(&m1)
+	for i := 0; i < 300; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			buf := mp.GetBuf()
+			allBufs = append(allBufs, buf)
+			buf.Reset()
+			//fmt.Println(buf1.Cap(), "buf is not nil")
+			buf.WriteString(s)
+			//time.Sleep(time.Millisecond * 10)
+			mp.PutBuf(buf)
+			//fmt.Println(buf1.String())
+			//mp.BufPool.Put(buf)
+		}()
+	}
+	wg.Wait()
+	runtime.ReadMemStats(&m2)
+	fmt.Println("total:", m2.TotalAlloc-m1.TotalAlloc)
+	fmt.Println("mallocs:", m2.Mallocs-m1.Mallocs)
+}
