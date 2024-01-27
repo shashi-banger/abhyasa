@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"os"
 	"runtime"
+	"runtime/pprof"
 	"sync"
 	"testing"
 )
@@ -75,6 +77,11 @@ func BenchmarkMempool(b *testing.B) {
 }
 
 func TestParallelUsage(t *testing.T) {
+	memProfileFile, err := os.Create("mem.prof")
+	if err != nil {
+		panic(err)
+	}
+	defer memProfileFile.Close()
 	var wg sync.WaitGroup
 	var m1, m2 runtime.MemStats
 	nb := 10
@@ -84,7 +91,7 @@ func TestParallelUsage(t *testing.T) {
 	s := "hello"
 
 	runtime.ReadMemStats(&m1)
-	for i := 0; i < 300; i++ {
+	for i := 0; i < 100000; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
@@ -103,4 +110,7 @@ func TestParallelUsage(t *testing.T) {
 	runtime.ReadMemStats(&m2)
 	fmt.Println("total:", m2.TotalAlloc-m1.TotalAlloc)
 	fmt.Println("mallocs:", m2.Mallocs-m1.Mallocs)
+	if err := pprof.WriteHeapProfile(memProfileFile); err != nil {
+		panic(err)
+	}
 }
