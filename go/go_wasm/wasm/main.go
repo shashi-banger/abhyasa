@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"syscall/js"
+
+	"github.com/tidwall/sjson"
 )
 
 func prettyJson(input string) (string, error) {
@@ -25,7 +27,8 @@ func jsonWrapper() js.Func {
 		}
 		inputJSON := args[0].String()
 		fmt.Printf("input %s\n", inputJSON)
-		pretty, err := prettyJson(inputJSON)
+		newJson, _ := sjson.Set(inputJSON, "name", "sb")
+		pretty, err := prettyJson(newJson)
 		if err != nil {
 			fmt.Printf("unable to convert to json %s\n", err)
 			return err.Error()
