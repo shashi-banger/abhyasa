@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+
+    <script src="wasm_exec.js"></script>
+
+    <script>
+        let p = (async () => {
+            const go = new Go();
+            let result = await WebAssembly.instantiateStreaming(fetch("json.wasm"), go.importObject);
+            await go.run(result.instance);
+        });
+        p();
+        (async () => {
+            await new Promise(r => setTimeout(r, 1000)); // Sleeping to allow  the json.wasm to register formatJson. Need a better way for this
+            console.log("async call done")
+            const json = '{"foo":345, "boo":"abc"}';
+            document.body.innerHTML = formatJSON(json);
+            })();
+    </script>
+  </head>
+
+  <body>
+  </body>
+</html>
