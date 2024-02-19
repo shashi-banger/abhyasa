@@ -1,5 +1,5 @@
 
-## Copy was_exec.js
+## Copy wasm_exec.js
 
 ```bash
 cp "$(go env GOROOT)/misc/wasm/wasm_exec.js" ./public/
