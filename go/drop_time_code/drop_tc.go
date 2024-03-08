@@ -39,25 +39,37 @@ func drop_timecode_to_timestamp(drop_timecode string) float64 {
 	return ts
 }
 
+func roundFloat(val float64, precision uint) float64 {
+	ratio := math.Pow(10, float64(precision))
+	return math.Round(val*ratio) / ratio
+}
+
 // timestamp_to_drop_timecode converts "actual" timestamp to drop frame timecode
 func timestamp_to_drop_timecode(ts_sec float64) string {
+	var num_min_since_10th_mod_min int
 	modulo_10th_min := int(ts_sec) / (10 * 60)
 	absolute_time_at_10th_mod_min := float64(modulo_10th_min * 600)
 
 	time_in_sec_since_10th_mod_min := float64(ts_sec) - absolute_time_at_10th_mod_min
 
-	num_min_in_modulo := int((time_in_sec_since_10th_mod_min - (1. / 29.97)) / 60)
+	//num_min_in_modulo := int((time_in_sec_since_10th_mod_min) / 60)
+	if int(time_in_sec_since_10th_mod_min/60) <= 5 {
+		v := roundFloat(float64(time_in_sec_since_10th_mod_min-(1/29.97)), 3)
+		num_min_since_10th_mod_min = int(v / 60.)
+	} else {
+		num_min_since_10th_mod_min = int(time_in_sec_since_10th_mod_min / 60)
+	}
 
-	actual_frames_29_97 := int(math.Round(time_in_sec_since_10th_mod_min * 29.97))
+	actual_frames_29_97 := int(math.Round(float64(time_in_sec_since_10th_mod_min * 29.97)))
 
-	equivalent_30_fps_frames := (actual_frames_29_97 + (num_min_in_modulo * 2))
+	equivalent_30_fps_frames := (actual_frames_29_97 + (num_min_since_10th_mod_min * 2))
 
 	total_time_in_30_fps := (float64(absolute_time_at_10th_mod_min)) + float64(equivalent_30_fps_frames)/30.
 
 	hh := int(total_time_in_30_fps / 3600)
 	mm := int((total_time_in_30_fps - float64(hh*3600)) / 60)
 	ss := int(total_time_in_30_fps - float64(hh*3600+mm*60))
-	ff := int(math.Round((total_time_in_30_fps - float64(hh*3600+mm*60+ss)) * 30))
+	ff := int(math.Round(float64((total_time_in_30_fps - float64(hh*3600+mm*60+ss)) * 30)))
 
 	return fmt.Sprintf("%02d:%02d:%02d;%02d", hh, mm, ss, ff)
 }
@@ -77,7 +89,16 @@ func main() {
 
 		derived_time_code := timestamp_to_drop_timecode(actual_time)
 
-		fmt.Printf("%d %.3f %s %.3f %s %.3f %d\n", frame_num_in29_97fps, actual_time, timecode, derived_ts, derived_time_code, diff, dropped_frames)
+		//fmt.Printf("%d %.3f %s %.3f %s %.3f %d\n", frame_num_in29_97fps, actual_time, timecode, derived_ts, derived_time_code, diff, dropped_frames)
+
+		if timecode != derived_time_code {
+			fmt.Printf("Mismatch %d %.3f %s %.3f %s %.3f %d\n", frame_num_in29_97fps, actual_time, timecode, derived_ts, derived_time_code, diff, dropped_frames)
+		}
+
+		if (actual_time - derived_ts) > 0.03 {
+			fmt.Printf("Mismatch %d %.3f %s %.3f %s %.3f %d\n", frame_num_in29_97fps, actual_time, timecode, derived_ts, derived_time_code, diff, dropped_frames)
+		}
+
 		if (frame_num_in30fps+1)%1800 == 0 && ((frame_num_in30fps+1)%18000) != 0 {
 			frame_num_in30fps += 3
 			dropped_frames += 2
