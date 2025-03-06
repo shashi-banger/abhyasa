@@ -3,7 +3,6 @@ module grpc_linkerd
 go 1.14
 
 require (
-	github.com/golang/protobuf v1.3.5 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	google.golang.org/grpc v1.28.0
+	google.golang.org/grpc v1.54.0
+	google.golang.org/grpc/examples v0.0.0-20230705174746-11feb0a9afd8
 )
